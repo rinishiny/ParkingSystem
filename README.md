@@ -1,6 +1,8 @@
 # ParkingSystem
 Developed a parking system for Round 2
+
 Please provide the file name along with the file name as the input.
+EG : F:\ParkingSystem\input.txt
 
 Rest of the input is taken from the input.txt.
 
