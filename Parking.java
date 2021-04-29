@@ -106,15 +106,23 @@ public static void main(String args[])
 	int n = 0;
 	int slotToLeave = 0;
 	int dAge = 0;
-
  	
 	Scanner scan = new Scanner(System.in);
-	//System.out.println("Enter file path with the file name");
-	//String filename = scan.nextLine();
+	System.out.println("Enter file path with the file name");
+	String path = scan.nextLine();
+	String filename = scan.nextLine();
 	try {
 	  //Reading the input file
-	  //File myObj = new File(filename);
-	  File myObj = new File("F:/ParkingSystem/input.txt");
+	  File myObj = new File(filename);
+	  if(path.contains("\\"))
+	  {
+		 path = path.replaceAll("\\\\", "/");
+		 path = path.concat("/" + filename);	
+	  }
+	  else
+	  {
+		 path = path.concat("/" + filename);	
+	  }
       Scanner myReader = new Scanner(myObj);
       while (myReader.hasNextLine()) {
         String data = myReader.nextLine();
