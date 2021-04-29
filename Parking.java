@@ -2,14 +2,15 @@ import java.io.File;
 import java.io.FileNotFoundException;  
 import java.util.*;  
 public class Parking
+{	
+	public static Map<Integer,String> slotStatus=new HashMap<Integer,String>();  //slot and its availability is stored
+	public static Map<String,Integer> vehicleDriver=new HashMap<String,Integer> (); //reg no along with the driver's age
+	public static Map<Integer,String> slotReg=new HashMap<Integer,String>();  //The slot number with corresponding reg no
+	
+//This method is used to park the vehicles in the parking lot
+public static void parkVehicle(String regno)
 {
-public static Map<Integer,String> parkVehicle(Map<String,Integer> vehicleDriver, 
-String regno, Map<Integer,String> slotStatus)
-{
-	ArrayList<Integer> sortedKeys = new ArrayList<Integer>();
-	Map<Integer,String> slotReg=new HashMap<Integer,String>();  	
-
-	Map<Integer, Map<String,Integer>> slotVehicle = new HashMap<Integer,Map<String,Integer>>();
+	ArrayList<Integer> sortedKeys = new ArrayList<Integer>(); 
  
         for (Map.Entry<Integer,String> en : slotStatus.entrySet()) {
 			if(en.getValue() == "Available")
@@ -17,6 +18,7 @@ String regno, Map<Integer,String> slotStatus)
 				sortedKeys.add(en.getKey());
 			}            
         }
+		//sort the slots to get the nearest available spot near the entry 
 		Collections.sort(sortedKeys); 
 		if(sortedKeys.isEmpty())
 		{
@@ -24,52 +26,78 @@ String regno, Map<Integer,String> slotStatus)
 		}
 		else 
 		{
-			int nextSlot = sortedKeys.get(0);
-			slotStatus.put(nextSlot, "Occupied");
-			slotVehicle.put(nextSlot, vehicleDriver);
-			
-			for (Map.Entry<String,Integer> en : vehicleDriver.entrySet()) {
-			if(en.getKey() == regno)
-			{
-				int dAge = en.getValue();
-			}            
-        }
-			System.out.println("Car with vehicle registration number " + regno +" has been parked at slot number " + sortedKeys.get(0));
-			sortedKeys.remove(0);
+			slotStatus.put(sortedKeys.get(0), "Occupied");
+			System.out.println("Car with vehicle registration number \"" + regno + "\" has been parked at slot number " + sortedKeys.get(0));
 			slotReg.put(sortedKeys.get(0),regno); 
+			sortedKeys.remove(0);
 		}
-		
-		return slotReg;
 }
 
-public static Map<Integer,String> LeaveVehicle(Map<Integer,String> slotStatus, int slotNumber, Map<Integer,String> slotReg, Map<String,Integer> vehicleDrive)
+public static void LeaveVehicle(int slotNumber)
 {
-String reg = null;
-int dage = 0;
-	
+	//Mark the slot available once a vehicle leaves the parking lot
 	for (Map.Entry<Integer,String> en : slotStatus.entrySet()) {
 			if(en.getKey() == slotNumber)
 			{
 				slotStatus.put(slotNumber, "Available");
 			}            
         }
-	
+
 	for (Map.Entry<Integer,String> en1 : slotReg.entrySet()) {
 			if(en1.getKey() == slotNumber)
-			{
-				  reg = en1.getValue();				  
-				 for (Map.Entry<String,Integer> en2 : vehicleDrive.entrySet()) {
-					if(en2.getKey() == reg)
+			{			  
+				 for (Map.Entry<String,Integer> en2 : vehicleDriver.entrySet()) {
+					if(en2.getKey() == en1.getValue())
 					{
-						  dage = en2.getValue();
-						 
-						 System.out.println("Slot number " + slotNumber + " vacated " + ", the car with vehicle registration number" + reg + " left the space, the driver of the car was of age " + dage);
+						 System.out.println("Slot number " + slotNumber + " vacated " + ", the car with vehicle registration number \"" + en1.getValue()  + "\" left the space, the driver of the car was of age " + en2.getValue());
 					}            
 				}
 			}            
         }
 		
-	return slotStatus;
+	
+}
+//This method is used to find the slot for a given reg number
+public static void FindTheSlotNumber(String vehicleNo)
+{
+	boolean isFound = false;
+	for (Map.Entry<Integer,String> en : slotReg.entrySet()) {
+			String str = en.getValue();
+			if(str.equals(vehicleNo))
+			{
+			isFound = true;
+			System.out.println(en.getKey());
+			}         
+        }
+	if (!isFound)
+	{
+		System.out.println("No parked car matches the query");
+	}
+}
+//This method is used to get the reg number given a particular age of a driver
+public static void FindTheRegNumber(int dage)
+{
+ArrayList<String> listOfRegNumber = new ArrayList<String >(); 	
+ 
+        for (Map.Entry<String,Integer> en : vehicleDriver.entrySet()) {
+			if(en.getValue() == dage)
+				{
+					listOfRegNumber.add(en.getKey());
+				}           
+        }
+	if (listOfRegNumber.isEmpty())
+		{
+			System.out.println("No parked car matches the query");
+		}
+	else
+		{
+			System.out.println("The vehicles parked by a driver with age " + dage + "are ");
+			for(int i=0;i<listOfRegNumber.size();i++)
+			{
+				System.out.print(listOfRegNumber.get(i) + ",");
+			}
+		}
+	
 }
 
 //driver function
@@ -77,20 +105,16 @@ public static void main(String args[])
 {
 	int n = 0;
 	int slotToLeave = 0;
-	int driver_age = 0;
-	String regno = null;
 	int dAge = 0;
-	
-	Map<Integer,String> slotStatus=new HashMap<Integer,String>();  
-	Map<String,Integer> vehicleDriver=new HashMap<String,Integer> (); 
-	Map<Integer,String> slotReg=new HashMap<Integer,String>(); 
+
  	
 	Scanner scan = new Scanner(System.in);
-	System.out.println("Enter file path with the file name");
-	String filename = scan.nextLine();
+	//System.out.println("Enter file path with the file name");
+	//String filename = scan.nextLine();
 	try {
 	  //Reading the input file
-	  File myObj = new File(filename);
+	  //File myObj = new File(filename);
+	  File myObj = new File("F:/ParkingSystem/input.txt");
       Scanner myReader = new Scanner(myObj);
       while (myReader.hasNextLine()) {
         String data = myReader.nextLine();
@@ -112,10 +136,10 @@ public static void main(String args[])
 		if (data.startsWith("Park"))
 		{
 			String[] splitStr = data.split("\\s+");
-			regno = splitStr[1];
-			driver_age = Integer.parseInt(splitStr[3]); 
+			String regno = splitStr[1];
+			int driver_age = Integer.parseInt(splitStr[3]); 
 			vehicleDriver.put(regno, driver_age);		
-			slotReg = parkVehicle(vehicleDriver,regno, slotStatus);		
+			parkVehicle(regno);		
 		}
 		
 		//Vehicle leaves the parking lot
@@ -123,7 +147,7 @@ public static void main(String args[])
 		{
 			String[] splitStr = data.split("\\s+");
 			slotToLeave = Integer.parseInt(splitStr[1]);
-			slotStatus = LeaveVehicle(slotStatus, slotToLeave, slotReg, vehicleDriver);
+			LeaveVehicle(slotToLeave);
 		}
 		
 		//Retrieve the slot number for a particular age
@@ -151,12 +175,35 @@ public static void main(String args[])
 									} 
 							}							
 						}
-				System.out.println("Slot numbers of the age" + dAge);
-				for(int i=0;i<slot.size();i++)
+				
+				if(reg.isEmpty())
+				{
+					System.out.println("No parked car matches the query");
+				}
+				else
+				{
+					for(int i=0;i<slot.size();i++)
 					{
-						System.out.println(slot.get(i) + ",");
+						System.out.print(slot.get(i) + ",");
 					}
-		}            
+					System.out.print("\n");
+				}
+				
+		}
+		//To get the slot number of a given reg no
+		if (data.startsWith("Slot_number_for_car_with_number"))
+		{
+			String[] splitStr = data.split("\\s+");
+			String vehicleNo = splitStr[1];
+			FindTheSlotNumber(vehicleNo);
+		}
+		//To get all the reg no given a specific age
+		if (data.startsWith("Vehicle_registration_number_for_driver_of_age"))
+		{
+			String[] splitStr = data.split("\\s+");
+			int dage = Integer.parseInt(splitStr[1]);
+			FindTheRegNumber(dage);
+		}		
 		}
 			
       }
